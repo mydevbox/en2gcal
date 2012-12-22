@@ -19,7 +19,7 @@
 
 /**
 *  @author  Chris Lawson 
-*  @version 0.1
+*  @version 0.2
 *  @since   2012-11-12
 */
 
@@ -40,6 +40,9 @@
 *  otherwise default calendar is used.
 *  Calendar names with spaces must be enclosed in quotes. "" or ''.
 *
+*  inc:{0|1} - optional - 1 by default - include copy of note contents in the description
+*  of the event.  All html will be removed however breaks and paragraphs are maintained.
+*
 */
 
 function addReminder() {
@@ -49,7 +52,8 @@ function addReminder() {
   var cal = '';
 
   for(i in threads){    
-    var params = parseSubject_(threads[0].getFirstMessageSubject());
+    var params = parseSubject_(threads[i].getFirstMessageSubject());
+    var msg = threads[i].getMessages();
     params = checkParams_(params);
     
     if ('cal' in params) {
@@ -60,8 +64,11 @@ function addReminder() {
         
     if (cal !== '' && cal !== undefined) {
       var event = cal.createEventFromDescription(params.subject);
-    
+          
       if (event === undefined) continue;
+      
+      if ('inc' in params && (params.inc === 1 || params.inc === 'true'))
+        event.setDescription(msg[0].getBody().replace(/<br>/gi, "\n").replace(/<p.*>/gi, "\n").replace(/<(?:.|\n)*?>/gm, ''));
       if ('sms' in params) event.addSmsReminder(params.sms);
       if ('pop' in params) event.addPopupReminder(params.pop);
       if ('email' in params) event.addEmailReminder(params.email);
@@ -75,13 +82,15 @@ function checkParams_(params) {
   var pop = UserProperties.getProperty('pop');
   var email = UserProperties.getProperty('email');
   var cal = UserProperties.getProperty('cal');
+  var inc = UserProperties.getProperty('inc') || 1;
 
   // if param not already specified on subject set to UserProperty if exists
   if (!('sms' in params) && sms) params.sms = sms;
   if (!('pop' in params) && pop) params.pop = pop;
   if (!('email' in params) && email) params.email = email;
   if (!('cal' in params) && cal) params.cal = cal;
-
+  if (!('inc' in params) && inc) params.inc = inc;
+  
   return params;
 }
 
