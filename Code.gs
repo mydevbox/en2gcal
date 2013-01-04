@@ -67,7 +67,7 @@ function addReminder() {
           
       if (event === undefined) continue;
       
-      if ('inc' in params && (params.inc === 1 || params.inc === 'true'))
+      if ('inc' in params && (params.inc === '1' || params.inc === 'true'))
         event.setDescription(msg[0].getBody().replace(/<br>/gi, "\n").replace(/<p.*>/gi, "\n").replace(/<(?:.|\n)*?>/gm, ''));
       if ('sms' in params) event.addSmsReminder(params.sms);
       if ('pop' in params) event.addPopupReminder(params.pop);
