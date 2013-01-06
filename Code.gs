@@ -19,8 +19,8 @@
 
 /**
 *  @author  Chris Lawson 
-*  @version 0.2
-*  @since   2012-11-12
+*  @version 0.3
+*  @since   2013-01-06
 */
 
 /**
@@ -43,6 +43,9 @@
 *  inc:{0|1} - optional - 1 by default - include copy of note contents in the description
 *  of the event.  All html will be removed however breaks and paragraphs are maintained.
 *
+*  {Evernote note link} - optional - Include the Evernote note link on the subject and it will 
+*  be added to the event description as text.  e.g. evernote:///view/999999/s1/...
+*
 */
 
 function addReminder() {
@@ -54,6 +57,7 @@ function addReminder() {
   for(i in threads){    
     var params = parseSubject_(threads[i].getFirstMessageSubject());
     var msg = threads[i].getMessages();
+    var desc = '';
     params = checkParams_(params);
     
     if ('cal' in params) {
@@ -67,8 +71,19 @@ function addReminder() {
           
       if (event === undefined) continue;
       
-      if ('inc' in params && (params.inc === '1' || params.inc === 'true'))
-        event.setDescription(msg[0].getBody().replace(/<br>/gi, "\n").replace(/<p.*>/gi, "\n").replace(/<(?:.|\n)*?>/gm, ''));
+      if ('evernote' in params) desc = "evernote:" + params.evernote + "\n";
+                 
+      if ('inc' in params && (params.inc === '1' || params.inc === 'true')) {
+        var rem_new_lines = msg[0].getBody().replace(/(\r\n|\n|\r)/gm,'');
+        var rem_spaces = rem_new_lines.replace(/\s+/g,' ');
+        var br_p_2_nl = rem_spaces.replace(/(<br\s*\/?>|<p\s*\/?>)/gi, '\n');
+        var rem_tags = br_p_2_nl.replace(/<(?:.|\n)*?>/gm, '');
+        var rem_en_banner = rem_tags.replace('From Evernote:','\n');
+        var spaces_2_nl = rem_en_banner.replace(/\s{3,}/gm, '\n');
+        desc += spaces_2_nl;
+      }
+      
+      if (desc !== '') event.setDescription(desc);
       if ('sms' in params) event.addSmsReminder(params.sms);
       if ('pop' in params) event.addPopupReminder(params.pop);
       if ('email' in params) event.addEmailReminder(params.email);
@@ -82,7 +97,7 @@ function checkParams_(params) {
   var pop = UserProperties.getProperty('pop');
   var email = UserProperties.getProperty('email');
   var cal = UserProperties.getProperty('cal');
-  var inc = UserProperties.getProperty('inc') || 1;
+  var inc = UserProperties.getProperty('inc') || '1';
 
   // if param not already specified on subject set to UserProperty if exists
   if (!('sms' in params) && sms) params.sms = sms;
