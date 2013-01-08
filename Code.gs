@@ -19,8 +19,8 @@
 
 /**
 *  @author  Chris Lawson 
-*  @version 0.3
-*  @since   2013-01-06
+*  @version 0.4
+*  @since   2013-01-07
 */
 
 /**
@@ -73,14 +73,16 @@ function addReminder() {
       
       if ('evernote' in params) desc = "evernote:" + params.evernote + "\n";
                  
-      if ('inc' in params && (params.inc === '1' || params.inc === 'true')) {
-        var rem_new_lines = msg[0].getBody().replace(/(\r\n|\n|\r)/gm,'');
-        var rem_spaces = rem_new_lines.replace(/\s+/g,' ');
-        var br_p_2_nl = rem_spaces.replace(/(<br\s*\/?>|<p\s*\/?>)/gi, '\n');
-        var rem_tags = br_p_2_nl.replace(/<(?:.|\n)*?>/gm, '');
-        var rem_en_banner = rem_tags.replace('From Evernote:','\n');
-        var spaces_2_nl = rem_en_banner.replace(/\s{3,}/gm, '\n');
-        desc += spaces_2_nl;
+      if ('inc' in params && (params.inc === '1' || params.inc === 'true')) {       
+        str = msg[0].getBody();
+        str=str.replace('From Evernote:','\n');
+        str=str.replace(/<\s*br\/*>/gi, "\n");
+        str=str.replace(/<\s*a.*href="(.*?)".*>(.*?)<\/a>/gi, " $2 ($1) ");
+        str=str.replace(/<\s*\/*.+?>/ig, "\n");
+        str=str.replace(/ {2,}/gi, " ");
+        str=str.replace(/\n+\s*/gi, "\n\n");
+        
+        desc += str;
       }
       
       if (desc !== '') event.setDescription(desc);
