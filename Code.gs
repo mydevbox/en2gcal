@@ -50,6 +50,8 @@
 
 function addReminder() {
   var label = GmailApp.getUserLabelByName('.reminder');
+  if (!label) return;
+
   var threads = label.getThreads();
   var subject = '';
   var cal = '';
