@@ -19,8 +19,8 @@
 
 /**
 *  @author  Chris Lawson 
-*  @version 0.4
-*  @since   2013-01-07
+*  @version 0.5
+*  @since   2015-10-22
 */
 
 /**
@@ -97,13 +97,17 @@ function addReminder() {
 }
 
 function checkParams_(params) {
-  var sms = UserProperties.getProperty('sms');
-  var pop = UserProperties.getProperty('pop');
-  var email = UserProperties.getProperty('email');
-  var cal = UserProperties.getProperty('cal');
-  var inc = UserProperties.getProperty('inc') || '1';
+  // getUserProperties() currently returns an empty object not matter what 
+  // values are stored. Using Script Properties instead.
+  var properties = PropertiesService.getScriptProperties();
 
-  // if param not already specified on subject set to UserProperty if exists
+  var sms = properties.getProperty('sms');
+  var pop = properties.getProperty('pop');
+  var email = properties.getProperty('email');
+  var cal = properties.getProperty('cal');
+  var inc = properties.getProperty('inc') || '1';
+
+  // if param not already specified on subject set to ScriptProperty if exists
   if (!('sms' in params) && sms) params.sms = sms;
   if (!('pop' in params) && pop) params.pop = pop;
   if (!('email' in params) && email) params.email = email;
